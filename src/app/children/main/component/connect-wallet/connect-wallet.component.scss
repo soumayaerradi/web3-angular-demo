@@ -1,0 +1,34 @@
+.connect-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.connect-btn {
+  background: #e5e4e4;
+  padding: 0;
+  border: 0;
+  border-radius: 25px;
+  cursor: pointer;
+  height: 180px !important;
+  width: 180px !important;
+}
+
+.connect-btn img {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 8px;
+}
+
+@media (max-width:692px) {
+  .connect-btn {
+    font-size: 10pt;
+  }
+
+  .connect-container .col-4 {
+    padding: 1px;
+  }
+}

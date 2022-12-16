@@ -1,0 +1,25 @@
+<div class="connect-container">
+  <div>
+    <button (click)='connectWallet("walletConnect")'
+            class="connect-btn">
+      <img src="../../../../../assets/icons/wallet-connect.svg" alt=""/><br/>
+      Connect with <br/>WalletConnect
+    </button>
+  </div>
+
+  <div class="col-4" *ngIf="getGlobalVariables().metaMaskExtProvider">
+    <button (click)='connectWallet("metamask")'
+            class="connect-btn">
+      <img src="../../../../../assets/icons/metamask.png" alt=""/><br/>
+      Connect with <br/>Metamask
+    </button>
+  </div>
+
+  <div class="col-4" *ngIf="getGlobalVariables().binanceExtProvider">
+    <button (click)='connectWallet("binance")'
+            class="connect-btn">
+      <img src="../../../../../assets/icons/binance.svg" alt=""/><br/>
+      Connect with <br/>Binance Wallet
+    </button>
+  </div>
+</div>

@@ -1,0 +1,44 @@
+.switch-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+
+  .title {
+    font-weight: bold;
+    font-size: 35px;
+  }
+
+  .currently {
+    font-size: 20px;
+  }
+
+  .networks-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+
+    .network {
+      background: #e5e4e4;
+      border: 0;
+      border-radius: 25px;
+      cursor: pointer;
+      height: 120px;
+      width: 120px;
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+
+      img {
+        border-radius: 50px;
+        height: 70px;
+        width: 70px;
+      }
+    }
+  }
+}

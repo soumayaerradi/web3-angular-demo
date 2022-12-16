@@ -1,0 +1,47 @@
+<div class="home-container">
+  <img src="assets/logo.png" alt="" />
+  <div *ngIf="!getGlobalVariables().isWalletConnected">
+    <button class="connect-btn" (click)="openConnect()">Connect wallet</button>
+  </div>
+
+
+  <div *ngIf="getGlobalVariables().isWalletConnected">
+    <h2>
+      <i class="fas fa-wallet text-dark"></i> Wallet Connected: {{getGlobalVariables().wallet.addressShort}}
+    </h2>
+    <p>Network: {{getGlobalVariables().wallet.network.name | uppercase}}({{getGlobalVariables().wallet.network.chainId}})</p>
+
+    <a href="" class="disconnect" (click)="disconnectWallet()">
+      Disconnect
+    </a>
+  </div>
+
+<!--  <div *ngIf="getGlobalVariables().isWalletConnected && getGlobalVariables().type === 'metamask'">-->
+<!--    <button class="switch" (click)="openSwitchNetwork()">Switch network</button>-->
+<!--  </div>-->
+
+  <div class="home-content" *ngIf="getGlobalVariables().wallet.address">
+    <div class="read">
+      <div class="content">
+        <span>Read balance: </span>
+        <span *ngIf="balance">{{balance}} BUSD</span>
+      </div>
+
+      <div class="content">
+        <span>Read allowance: </span>
+        <span *ngIf="allowance">{{allowance}} BUSD</span>
+      </div>
+
+      <button (click)="handleRead()">READ</button>
+    </div>
+
+    <div class="write">
+      <div class="content">
+        <span>Approve BUSD Testnet: </span>
+        <input [(ngModel)]="amount"/>
+      </div>
+
+      <button (click)="handleWrite()">APPROVE</button>
+    </div>
+  </div>
+</div>

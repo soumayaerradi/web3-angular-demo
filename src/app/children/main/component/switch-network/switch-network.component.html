@@ -1,0 +1,14 @@
+<div class="switch-container">
+  <h1 class="title">Switch network</h1>
+
+  <span class="currently">Currently connected to <i>{{current_network}}</i> network</span>
+
+  <div class="networks-container">
+    <div *ngFor="let network of data.supported_networks">
+      <button class="network" (click)="switchNetwork(network)">
+        <img [src]="getIconNetwork(network)" alt="" />
+        {{network.chainName}}
+      </button>
+    </div>
+  </div>
+</div>
