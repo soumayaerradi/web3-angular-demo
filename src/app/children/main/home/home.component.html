@@ -1,5 +1,4 @@
 <div class="home-container">
-  <img src="assets/logo.png" alt="" />
   <div *ngIf="!getGlobalVariables().isWalletConnected">
     <button class="connect-btn" (click)="openConnect()">Connect wallet</button>
   </div>

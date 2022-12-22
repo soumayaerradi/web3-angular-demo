@@ -6,10 +6,6 @@
   gap: 90px;
   padding: 50px;
 
-  img {
-    height: 150px;
-  }
-
   .disconnect {
     color: red;
     text-decoration: none;
@@ -38,7 +34,8 @@
     font-size: 24px;
 
     .read {
-      background-color: antiquewhite;
+      color: #FFFFFF;
+      background-color: #151b36;
       padding: 20px;
       border-radius: 15px;
       display: flex;
@@ -47,7 +44,8 @@
     }
 
     .write {
-      background-color: antiquewhite;
+      color: #FFFFFF;
+      background-color: #151b36;
       padding: 20px;
       border-radius: 15px;
       display: flex;
