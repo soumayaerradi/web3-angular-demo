@@ -8,16 +8,14 @@
     <h2>
       <i class="fas fa-wallet text-dark"></i> Wallet Connected: {{getGlobalVariables().wallet.addressShort}}
     </h2>
-    <p>Network: {{getGlobalVariables().wallet.network.name | uppercase}}({{getGlobalVariables().wallet.network.chainId}})</p>
+    <p>Network: {{getGlobalVariables().wallet.network.name | uppercase}}({{getGlobalVariables().wallet.network.chainId}}
+      )</p>
 
     <a href="" class="disconnect" (click)="disconnectWallet()">
       Disconnect
     </a>
   </div>
 
-<!--  <div *ngIf="getGlobalVariables().isWalletConnected && getGlobalVariables().type === 'metamask'">-->
-<!--    <button class="switch" (click)="openSwitchNetwork()">Switch network</button>-->
-<!--  </div>-->
 
   <div class="home-content" *ngIf="getGlobalVariables().wallet.address">
     <div class="read">
@@ -25,22 +23,22 @@
         <span>Read balance: </span>
         <span *ngIf="balance">{{balance}} BUSD</span>
       </div>
-
-      <div class="content">
-        <span>Read allowance: </span>
-        <span *ngIf="allowance">{{allowance}} BUSD</span>
-      </div>
-
-      <button (click)="handleRead()">READ</button>
     </div>
 
     <div class="write">
       <div class="content">
-        <span>Approve BUSD Testnet: </span>
+        <span>Receiver: </span>
+        <input [(ngModel)]="receiver"/>
+      </div>
+
+      <div class="content">
+        <span>Amount: </span>
         <input [(ngModel)]="amount"/>
       </div>
 
-      <button (click)="handleWrite()">APPROVE</button>
+      <button [disabled]="!receiver || !amount" *ngIf="allowance" (click)="transfer()">TRANSFER</button>
+      <button [disabled]="!receiver || !amount" *ngIf="!allowance" (click)="approve()">APPROVE</button>
+      <button [disabled]="!receiver || !amount" *ngIf="!allowance" (click)="readAllowance()">CHECK ALLOWANCE</button>
     </div>
   </div>
 </div>

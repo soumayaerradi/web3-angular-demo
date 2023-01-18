@@ -1,15 +1,15 @@
-import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import {Component, OnInit} from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
+import {formatFixed} from '@ethersproject/bignumber';
 
-import { ConnectWalletComponent } from '../component/connect-wallet/connect-wallet.component';
-import { SwitchNetworkComponent } from '../component/switch-network/switch-network.component';
+import {ConnectWalletComponent} from '../component/connect-wallet/connect-wallet.component';
 
-import { GlobalVariables } from "../../../core/helpers/global-variables";
-import { ChainId, NETWORK_INFO } from "../../../core/helpers/networks";
-import { WalletService } from "../../../core/service/wallet.service";
-import { ContractService } from "../../../core/service/contract.service";
-import { NetworkService } from "../../../core/service/network.service";
+import {GlobalVariables} from "../../../core/helpers/global-variables";
+import {ChainId, NETWORK_INFO} from "../../../core/helpers/networks";
+import {WalletService} from "../../../core/service/wallet.service";
+import {ContractService} from "../../../core/service/contract.service";
+import {NetworkService} from "../../../core/service/network.service";
+import {ethers} from "ethers";
 
 const ERC20abi = require('../../../core/abi/erc20.abi.json');
 
@@ -21,15 +21,10 @@ const ERC20abi = require('../../../core/abi/erc20.abi.json');
 export class HomeComponent implements OnInit {
   win: any;
   primary_network = NETWORK_INFO[ChainId.BSCTestnet];
-  supported_network = [
-    NETWORK_INFO[ChainId.BSC],
-    NETWORK_INFO[ChainId.Avalanche],
-    NETWORK_INFO[ChainId.Palm],
-    NETWORK_INFO[ChainId.Polygon],
-  ];
-  balance: string | undefined;
   allowance: string | undefined;
+  balance: string | undefined;
   amount: string = '0';
+  receiver: string = '';
 
   constructor(
     public dialog: MatDialog,
@@ -43,75 +38,83 @@ export class HomeComponent implements OnInit {
     _walletService.initNetwork(this.primary_network);
 
     // check account
-    this.getProvider()
+    this.getProvider();
   }
 
-  ngOnInit(): void {}
-
-  handleRead(): void {
-    this.readBalance(this.getGlobalVariables().wallet.address)
-    this.readAllowance(this.getGlobalVariables().wallet.address, this.getGlobalVariables().wallet.address);
+  ngOnInit(): void {
+    this.getBalance();
   }
 
-  handleWrite(): void {
-    this.approve(this.getGlobalVariables().wallet.address, +this.amount)
+  async approve() {
+    const provider = new ethers.providers.Web3Provider(this.win.ethereum, "any");
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+    let userAddress = await signer.getAddress();
+
+    const busdContract = new ethers.Contract('0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', ERC20abi, signer);
+
+    const amountFormatted = ethers.utils.parseEther(this.amount)
+
+    const tx = await busdContract['transfer'](userAddress, amountFormatted);
   }
 
-  // example of write contract
-  async approve(spender: string, amount: number) {
-    const decimals = 18;
-    const amountBignumber = BigNumber.from(amount).mul(BigNumber.from(10).pow(decimals));
+  async readAllowance() {
+    const provider = new ethers.providers.Web3Provider(this.win.ethereum, "any");
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+    let userAddress = await signer.getAddress();
 
-    try {
-      const tx = await this._contractService.writeContract(
-        '0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', // BUSD testnet
-        ERC20abi,
-        'approve',
-        [spender, amountBignumber]
-      );
+    const busdContract = new ethers.Contract('0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', ERC20abi, signer);
 
-      console.log('Successfully approved');
-      this.amount = '0';
-      this.readAllowance(this.getGlobalVariables().wallet.address, this.getGlobalVariables().wallet.address)
-    } catch (error: any) {
-      console.error(error.message);
-    }
+    let allowance = await busdContract['allowance'](userAddress, this.receiver);
+
+    this.allowance = formatFixed(allowance, 18)
   }
 
-  // example of read contract
-  async readBalance(account: string) {
-    try {
-      const balance = await this._contractService.readContract(
-        '0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', // BUSD testnet
-        NETWORK_INFO[ChainId.BSCTestnet].rpcUrls[0],
-        ERC20abi,
-        'balanceOf',
-        [account]
-      );
+  async getBalance() {
+    const provider = new ethers.providers.Web3Provider(this.win.ethereum, "any");
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+    let userAddress = await signer.getAddress();
 
-      console.log('Balance in BigNumber: ', balance);
-      console.log('Balance as number: ', Number(balance));
-      this.balance = formatFixed(balance, 18);
-    } catch (error: any) {
-      console.error(error.message);
-    }
+    const busd = {
+      address: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
+      abi: [
+        "function balanceOf(address _owner) public view returns (uint256 balance)",
+        "function transfer(address _to, uint256 _value) public returns (bool success)",
+      ],
+    };
+
+    const busdContract = new ethers.Contract(busd.address, busd.abi, signer);
+
+    let busdBalance = await busdContract['balanceOf'](userAddress);
+
+    busdBalance = ethers.utils.formatUnits(busdBalance, 18);
+
+    this.balance = busdBalance
   }
 
-  // example of read contract
-  async readAllowance(owner: string, spender: string) {
-    try {
-      const allowance = await this._contractService.readContract(
-        '0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', // BUSD testnet
-        NETWORK_INFO[ChainId.BSCTestnet].rpcUrls[0],
-        ERC20abi,
-        'allowance',
-        [owner, spender]
-      );
+  async transfer() {
+    const provider = new ethers.providers.Web3Provider(this.win.ethereum, "any");
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
 
-      this.allowance = formatFixed(allowance, 18)
-    } catch (error: any) {
-      console.error(error.message);
-    }
+    const busd = {
+      address: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
+      abi: [
+        "function balanceOf(address _owner) public view returns (uint256 balance)",
+        "function transfer(address _to, uint256 _value) public returns (bool success)",
+      ],
+    };
+
+    const busdContract = new ethers.Contract(busd.address, busd.abi, signer);
+
+    const amountFormatted = ethers.utils.parseEther(this.amount)
+
+    const tx = await busdContract['transfer'](this.receiver, amountFormatted, {gasPrice: 20e9});
+
+    const receipt = await tx.wait();
+    console.log(receipt)
   }
 
   getGlobalVariables(): GlobalVariables {
@@ -127,13 +130,6 @@ export class HomeComponent implements OnInit {
   }
 
   openConnect(): void {
-    this.dialog
-      .open(ConnectWalletComponent);
-  }
-
-  openSwitchNetwork(): void {
-    this.dialog.open(SwitchNetworkComponent, {
-      data: { supported_networks: this.supported_network },
-    });
+    this.dialog.open(ConnectWalletComponent);
   }
 }
