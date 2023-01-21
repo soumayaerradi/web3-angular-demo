@@ -22,13 +22,21 @@
       <div class="content">
         <span>Read balance: </span>
         <span *ngIf="balance">{{balance}} BUSD</span>
+        <button class="refresh" mat-mini-fab (click)="getBalance()">
+          <mat-icon>refresh</mat-icon>
+        </button>
       </div>
     </div>
 
     <div class="write">
       <div class="content">
+        <span>Spender: </span>
+        <input [(ngModel)]="spender"/>
+      </div>
+
+      <div class="content">
         <span>Receiver: </span>
-        <input [(ngModel)]="receiver"/>
+        <input [(ngModel)]="recipient"/>
       </div>
 
       <div class="content">
@@ -36,9 +44,26 @@
         <input [(ngModel)]="amount"/>
       </div>
 
-      <button [disabled]="!receiver || !amount" *ngIf="allowance" (click)="transfer()">TRANSFER</button>
-      <button [disabled]="!receiver || !amount" *ngIf="!allowance" (click)="approve()">APPROVE</button>
-      <button [disabled]="!receiver || !amount" *ngIf="!allowance" (click)="readAllowance()">CHECK ALLOWANCE</button>
+      <button
+        [disabled]="!recipient || !amount"
+        *ngIf="checked && allowance"
+        (click)="transferFrom()"
+      >TRANSFER
+      </button>
+
+      <button
+        [disabled]="!recipient || !amount"
+        *ngIf="!checked && allowance"
+        (click)="approve()"
+      >APPROVE
+      </button>
+
+      <button
+        [disabled]="!recipient || !amount"
+        *ngIf="!checked && !allowance"
+        (click)="readAllowance()"
+      >CHECK ALLOWANCE
+      </button>
     </div>
   </div>
 </div>

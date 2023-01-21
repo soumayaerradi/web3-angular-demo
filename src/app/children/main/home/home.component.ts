@@ -13,6 +13,12 @@ import {ethers} from "ethers";
 
 const ERC20abi = require('../../../core/abi/erc20.abi.json');
 
+
+/***
+ * address 1: 0x2060266bA136DC0b2f4D5Cebd147209F0954C756
+ * address 2: 0x87028e52304A3d58D6d48DC5a864815Ab70fB6F5
+ */
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -22,9 +28,11 @@ export class HomeComponent implements OnInit {
   win: any;
   primary_network = NETWORK_INFO[ChainId.BSCTestnet];
   allowance: string | undefined;
+  checked: boolean = false;
   balance: string | undefined;
   amount: string = '0';
-  receiver: string = '';
+  recipient: string = '';
+  spender: string = '';
 
   constructor(
     public dialog: MatDialog,
@@ -46,33 +54,39 @@ export class HomeComponent implements OnInit {
   }
 
   async approve() {
-    const provider = new ethers.providers.Web3Provider(this.win.ethereum, "any");
+    const provider = new ethers.providers.Web3Provider(this.win.ethereum);
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
-    let userAddress = await signer.getAddress();
 
     const busdContract = new ethers.Contract('0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', ERC20abi, signer);
 
     const amountFormatted = ethers.utils.parseEther(this.amount)
 
-    const tx = await busdContract['transfer'](userAddress, amountFormatted);
+    const tx = await busdContract['approve'](this.spender, amountFormatted);
+
+    const receipt = await tx.wait();
+    console.log(receipt)
+    this.readAllowance()
   }
 
   async readAllowance() {
-    const provider = new ethers.providers.Web3Provider(this.win.ethereum, "any");
+    const provider = new ethers.providers.Web3Provider(this.win.ethereum);
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
     let userAddress = await signer.getAddress();
 
     const busdContract = new ethers.Contract('0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', ERC20abi, signer);
 
-    let allowance = await busdContract['allowance'](userAddress, this.receiver);
+    let allowance = await busdContract['allowance'](userAddress, userAddress);
 
     this.allowance = formatFixed(allowance, 18)
+    this.checked = +this.allowance >= +this.amount;
+
+    console.log(this.allowance)
   }
 
   async getBalance() {
-    const provider = new ethers.providers.Web3Provider(this.win.ethereum, "any");
+    const provider = new ethers.providers.Web3Provider(this.win.ethereum);
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
     let userAddress = await signer.getAddress();
@@ -95,7 +109,7 @@ export class HomeComponent implements OnInit {
   }
 
   async transfer() {
-    const provider = new ethers.providers.Web3Provider(this.win.ethereum, "any");
+    const provider = new ethers.providers.Web3Provider(this.win.ethereum);
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
 
@@ -111,7 +125,23 @@ export class HomeComponent implements OnInit {
 
     const amountFormatted = ethers.utils.parseEther(this.amount)
 
-    const tx = await busdContract['transfer'](this.receiver, amountFormatted, {gasPrice: 20e9});
+    const tx = await busdContract['transfer'](this.recipient, amountFormatted);
+
+    const receipt = await tx.wait();
+    console.log(receipt)
+  }
+
+  async transferFrom() {
+    this.readAllowance()
+    const provider = new ethers.providers.Web3Provider(this.win.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+
+    const busdContract = new ethers.Contract('0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', ERC20abi, signer);
+
+    const amountFormatted = ethers.utils.parseEther(this.amount)
+
+    const tx = await busdContract['transferFrom'](this.spender, this.recipient, amountFormatted);
 
     const receipt = await tx.wait();
     console.log(receipt)
