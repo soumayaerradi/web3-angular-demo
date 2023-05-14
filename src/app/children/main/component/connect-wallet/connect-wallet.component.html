@@ -22,4 +22,11 @@
       Connect with <br/>Binance Wallet
     </button>
   </div>
+
+  <div class="col-4" *ngIf="getGlobalVariables().coinbaseExtProvider">
+    <button (click)="connectWallet('coinbase')" class="connect-btn">
+      <img src="../../../../../assets/icons/coinbase.svg" alt="" /><br />
+      Connect with <br />Coinbase Wallet
+    </button>
+  </div>
 </div>

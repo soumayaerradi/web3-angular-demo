@@ -30,6 +30,7 @@
   .home-content {
     display: flex;
     flex-direction: column;
+    width: 50%;
     gap: 80px;
     font-size: 24px;
 
@@ -53,8 +54,9 @@
       gap: 15px;
 
       input {
+        width: 80%;
         font-weight: 400;
-        font-size: 26px;
+        font-size: 20px;
         line-height: 36px;
         text-transform: capitalize;
         border-radius: 5px;

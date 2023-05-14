@@ -20,6 +20,7 @@ export class GlobalVariables {
   public walletConnectProvider: any = {};
   public metaMaskExtProvider: any = false;
   public binanceExtProvider: any = false;
+  public coinbaseExtProvider: any = false;
   public browserExtSupported: any = false;
 
   public setLocalStorage = (key: string, obj: any) => {

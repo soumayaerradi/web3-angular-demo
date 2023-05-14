@@ -8,8 +8,7 @@
     <h2>
       <i class="fas fa-wallet text-dark"></i> Wallet Connected: {{getGlobalVariables().wallet.addressShort}}
     </h2>
-    <p>Network: {{getGlobalVariables().wallet.network.name | uppercase}}({{getGlobalVariables().wallet.network.chainId}}
-      )</p>
+    <p>Network: {{getGlobalVariables().wallet.network.name | uppercase}}({{getGlobalVariables().wallet.network.chainId}})</p>
 
     <a href="" class="disconnect" (click)="disconnectWallet()">
       Disconnect
@@ -30,11 +29,6 @@
 
     <div class="write">
       <div class="content">
-        <span>Spender: </span>
-        <input [(ngModel)]="spender"/>
-      </div>
-
-      <div class="content">
         <span>Receiver: </span>
         <input [(ngModel)]="recipient"/>
       </div>
@@ -46,23 +40,8 @@
 
       <button
         [disabled]="!recipient || !amount"
-        *ngIf="checked && allowance"
-        (click)="transferFrom()"
+        (click)="transfer()"
       >TRANSFER
-      </button>
-
-      <button
-        [disabled]="!recipient || !amount"
-        *ngIf="!checked && allowance"
-        (click)="approve()"
-      >APPROVE
-      </button>
-
-      <button
-        [disabled]="!recipient || !amount"
-        *ngIf="!checked && !allowance"
-        (click)="readAllowance()"
-      >CHECK ALLOWANCE
       </button>
     </div>
   </div>

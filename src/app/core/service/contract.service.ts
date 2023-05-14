@@ -18,18 +18,24 @@ export class ContractService {
    * @private
    */
   private async getWebProvider() {
-    const type = this._globalVariables.getLocalStorage("type");
+    const type = this._globalVariables.getLocalStorage('type');
     let provider: any;
 
-    if (type === "metamask" && this.win.ethereum) {
-      provider = this.win.ethereum;
-    } else if (type === "binance" && this.win.BinanceChain) {
+    if (type === 'metamask' && this.win.ethereum) {
+      provider = this._globalVariables.metaMaskExtProvider;
+    } else if (type === 'coinbase' && this.win.ethereum) {
+      provider = this._globalVariables.coinbaseExtProvider;
+    } else if (type === 'binance' && this.win.BinanceChain) {
       provider = this.win.BinanceChain;
     } else {
-      provider = new WalletConnectProvider({
+      const walletConnectProvider = new WalletConnectProvider({
         infuraId: this._globalVariables.infuraId,
-        rpc: this._globalVariables.requiredNetwork.rpc
+        rpc: this._globalVariables.requiredNetwork.rpc,
       });
+
+      await walletConnectProvider.enable();
+
+      provider = walletConnectProvider;
     }
 
     return new ethers.providers.Web3Provider(provider);

@@ -1,17 +1,15 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
-import {formatFixed} from '@ethersproject/bignumber';
+import {ethers} from "ethers";
 
 import {ConnectWalletComponent} from '../component/connect-wallet/connect-wallet.component';
 
-import {GlobalVariables} from "../../../core/helpers/global-variables";
-import {ChainId, NETWORK_INFO} from "../../../core/helpers/networks";
 import {WalletService} from "../../../core/service/wallet.service";
 import {ContractService} from "../../../core/service/contract.service";
 import {NetworkService} from "../../../core/service/network.service";
-import {ethers} from "ethers";
 
-const ERC20abi = require('../../../core/abi/erc20.abi.json');
+import {GlobalVariables} from "../../../core/helpers/global-variables";
+import {ChainId, NETWORK_INFO} from "../../../core/helpers/networks";
 
 
 /***
@@ -27,6 +25,14 @@ const ERC20abi = require('../../../core/abi/erc20.abi.json');
 export class HomeComponent implements OnInit {
   win: any;
   primary_network = NETWORK_INFO[ChainId.BSCTestnet];
+
+  BUSD_ADDRESS: string = '0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee';
+  BUSD_ABI: string[] = [
+    "function name() public view returns (string name)",
+    "function balanceOf(address _owner) public view returns (uint256 balance)",
+    "function transfer(address _to, uint256 _value) public returns (bool success)",
+  ];
+
   allowance: string | undefined;
   checked: boolean = false;
   balance: string | undefined;
@@ -46,105 +52,55 @@ export class HomeComponent implements OnInit {
     _walletService.initNetwork(this.primary_network);
 
     // check account
-    this.getProvider();
+    this.getProvider()
+      // check network only if needed
+      .then((_) => _networkService.checkNetwork(this.primary_network));
   }
 
   ngOnInit(): void {
-    this.getBalance();
+    this.getTokenName();
   }
 
-  async approve() {
-    const provider = new ethers.providers.Web3Provider(this.win.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
+  async getTokenName() {
+    const provider = new ethers.providers.JsonRpcProvider(this.primary_network.rpcUrls[0]);
+    const busdContract = new ethers.Contract(this.BUSD_ADDRESS, this.BUSD_ABI, provider);
+    const tokenName = await busdContract['name']();
 
-    const busdContract = new ethers.Contract('0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', ERC20abi, signer);
-
-    const amountFormatted = ethers.utils.parseEther(this.amount)
-
-    const tx = await busdContract['approve'](this.spender, amountFormatted);
-
-    const receipt = await tx.wait();
-    console.log(receipt)
-    this.readAllowance()
-  }
-
-  async readAllowance() {
-    const provider = new ethers.providers.Web3Provider(this.win.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    let userAddress = await signer.getAddress();
-
-    const busdContract = new ethers.Contract('0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', ERC20abi, signer);
-
-    let allowance = await busdContract['allowance'](userAddress, userAddress);
-
-    this.allowance = formatFixed(allowance, 18)
-    this.checked = +this.allowance >= +this.amount;
-
-    console.log(this.allowance)
+    console.log(tokenName);
   }
 
   async getBalance() {
-    const provider = new ethers.providers.Web3Provider(this.win.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    let userAddress = await signer.getAddress();
+    const provider = this.getGlobalVariables().metaMaskExtProvider;
+    const web3provider = new ethers.providers.Web3Provider(provider);
+    const signer = web3provider.getSigner();
+    const userAddress = await signer.getAddress();
 
-    const busd = {
-      address: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
-      abi: [
-        "function balanceOf(address _owner) public view returns (uint256 balance)",
-        "function transfer(address _to, uint256 _value) public returns (bool success)",
-      ],
-    };
-
-    const busdContract = new ethers.Contract(busd.address, busd.abi, signer);
+    const busdContract = new ethers.Contract(this.BUSD_ADDRESS, this.BUSD_ABI, signer);
 
     let busdBalance = await busdContract['balanceOf'](userAddress);
 
+    console.log(busdBalance);
     busdBalance = ethers.utils.formatUnits(busdBalance, 18);
 
-    this.balance = busdBalance
+    console.log(busdBalance);
+
+    this.balance = busdBalance;
   }
 
   async transfer() {
-    const provider = new ethers.providers.Web3Provider(this.win.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
+    const provider = this.getGlobalVariables().metaMaskExtProvider;
+    const web3provider = new ethers.providers.Web3Provider(provider);
+    const signer = web3provider.getSigner();
 
-    const busd = {
-      address: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee",
-      abi: [
-        "function balanceOf(address _owner) public view returns (uint256 balance)",
-        "function transfer(address _to, uint256 _value) public returns (bool success)",
-      ],
-    };
-
-    const busdContract = new ethers.Contract(busd.address, busd.abi, signer);
+    const busdContract = new ethers.Contract(this.BUSD_ADDRESS, this.BUSD_ABI, signer);
 
     const amountFormatted = ethers.utils.parseEther(this.amount)
 
     const tx = await busdContract['transfer'](this.recipient, amountFormatted);
+    console.log(tx);
 
     const receipt = await tx.wait();
-    console.log(receipt)
-  }
-
-  async transferFrom() {
-    this.readAllowance()
-    const provider = new ethers.providers.Web3Provider(this.win.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-
-    const busdContract = new ethers.Contract('0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee', ERC20abi, signer);
-
-    const amountFormatted = ethers.utils.parseEther(this.amount)
-
-    const tx = await busdContract['transferFrom'](this.spender, this.recipient, amountFormatted);
-
-    const receipt = await tx.wait();
-    console.log(receipt)
+    console.log(receipt);
   }
 
   getGlobalVariables(): GlobalVariables {
