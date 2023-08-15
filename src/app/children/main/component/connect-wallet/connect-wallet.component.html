@@ -1,11 +1,11 @@
 <div class="connect-container">
-  <div>
-    <button (click)='connectWallet("walletConnect")'
-            class="connect-btn">
-      <img src="../../../../../assets/icons/wallet-connect.svg" alt=""/><br/>
-      Connect with <br/>WalletConnect
-    </button>
-  </div>
+<!--  <div>-->
+<!--    <button (click)='connectWallet("walletConnect")'-->
+<!--            class="connect-btn">-->
+<!--      <img src="../../../../../assets/icons/wallet-connect.svg" alt=""/><br/>-->
+<!--      Connect with <br/>WalletConnect-->
+<!--    </button>-->
+<!--  </div>-->
 
   <div class="col-4" *ngIf="getGlobalVariables().metaMaskExtProvider">
     <button (click)='connectWallet("metamask")'

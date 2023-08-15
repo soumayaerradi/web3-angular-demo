@@ -44,7 +44,7 @@ export class WalletService {
       );
     }
 
-    this.initWalletConnect();
+    // this.initWalletConnect();
     if (this._globalVariables.isCordova) {
       this.setConnectLinkForMobile();
     }
